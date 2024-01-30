@@ -1,20 +1,30 @@
 from tkinter import *
 import websocket
 import threading
+import json
 
 def send_scrollbar_value(value):
     global ws
+    global telemetry
     if ws:
-        print(value)
-        ws.send(value)
+        ws.send(json.dumps({"scrollBar": value, "telemetry": telemetry}))
+
+def send_telemetry_value(value):
+    global ws
+    global scrollBar
+    if ws:
+        ws.send(json.dumps({"scrollBar": scrollBar, "telemetry": value}))
+
 
 def websocket_thread():
     global ws
+    global scrollBar
     ws = websocket.create_connection("ws://localhost:8000/ws/642003")
     while True:
-        value = ws.recv()
-        print(value)
-        root.after(0, update_status_bar, value)
+        data = json.loads(ws.recv())
+        scrollBar = data["scrollBar"]
+        print(data)
+        root.after(0, update_status_bar, data["scrollBar"])
 
 def update_status_bar(value):
     s_bar.set(value)
@@ -49,8 +59,11 @@ timer = 0
 def timer_service():
     global timer
     global t_string
+    global telemetry
     timer+=1
     t_string.set(str(timer))
+    send_telemetry_value(str(timer))
+    telemetry = str(timer)
     root.after(1000, timer_service)
 
 t_frame = LabelFrame(root, text="Telemetry Example")
@@ -64,6 +77,9 @@ t_label.pack(expand=True)
 root.after(1000,timer_service)
 
 ws = None
+scrollBar = 0
+telemetry = 0
+
 thread = threading.Thread(target=websocket_thread)
 thread.daemon = True 
 thread.start()

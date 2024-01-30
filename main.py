@@ -15,31 +15,49 @@ html = """
 <html>
     <head>
         <title>Websocket Demo</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
     </head>
     <body>
-    <div class="m2 w-50 d-flex justify-content-center">
-   <h1>Drag the Slider !!</h1>
-    </div>
-    <div class="container mt-3">
-        <input type="range" class="form-control" id="range" autocomplete="off" onChange="sendData(event)"/>  
-        <span id='rangeValue' class="mt-5"></span>    
+    <div>
+        <center>
+        <h1>Scrollbar and Telemetry Example</h1>
+            <br/>
+            <br/>
+            <div style="display:flex;width:100%;">
+                    <fieldset style="width:75%">
+                        <legend>Scrollbar Example</legend>
+                        <input type="range" class="form-control" id="range" autocomplete="off" onChange="sendData(event)" min="0" max="100" value="0" />  
+                        <br/>
+                        <span id='rangeValue' class="mt-5">0</span>
+                    </fieldset>
+                    <fieldset style="width:25%">
+                        <legend>Telemetry Example</legend>
+                        </b><span id='telemetryValue' class="mt-5">50</span>
+                    </fieldset>
+            </div>
+        </center>
     </div>
     
-        <script>    
+        <script> 
             var ws = new WebSocket(`ws://localhost:8000/ws/642003`);
 
             ws.onmessage = function(event) {
                 var messages = document.getElementById('rangeValue')
                 var input = document.getElementById("range")
-                input.value = event.data    
-                messages.textContent = event.data
+                var telemetry = document.getElementById('telemetryValue')
+                var data = JSON.parse(event.data)
+                input.value = data.scrollBar
+                telemetry.innerHTML = data.telemetry  
+                messages.textContent = data.scrollBar
             };
 
             function sendData(event) {
                 var input = document.getElementById("range")
-                ws.send(input.value)
+                
+                var data = JSON.stringify({"scrollBar": input.value, "telemetry": 0})
+                console.log(data)
+                ws.send(data)
+
                 var range = document.getElementById('rangeValue').textContent = event.data      
                 event.preventDefault()  
             }
@@ -59,12 +77,12 @@ class ConnectionManager:
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
 
-    async def send_personal_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
+    async def send_personal_message(self, message: dict, websocket: WebSocket):
+        await websocket.send_json(message)
     
     async def broadcast(self, message: str):
         for connection in self.active_connections:
-            await connection.send_text(message)
+            await connection.send_json(message)
 
     
 manager = ConnectionManager()
@@ -80,7 +98,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await manager.connect(websocket)
     try: 
         while True:
-            data = await websocket.receive_text()
+            data = await websocket.receive_json()
+
             await manager.send_personal_message(data, websocket)
             await manager.broadcast(data)
     except WebSocketDisconnect:
