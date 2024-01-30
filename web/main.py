@@ -19,6 +19,9 @@ html = """
 
     </head>
     <body>
+    <div class="m2 w-50 d-flex justify-content-center">
+   <h1>Drag the Slider !!</h1>
+    </div>
     <div class="container mt-3">
         <input type="range" class="form-control" id="range" autocomplete="off" onChange="sendData(event)"/>  
         <span id='rangeValue' class="mt-5"></span>    
