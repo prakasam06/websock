@@ -34,6 +34,10 @@ html = """
                         <legend>Telemetry Example</legend>
                         </b><span id='telemetryValue' class="mt-5">50</span>
                     </fieldset>
+                    
+            </div>
+            <div style="width:25% margin-top:2rem">
+            <img  id="videoFrame" width="640" height="480" />
             </div>
         </center>
     </div>
@@ -46,6 +50,12 @@ html = """
                 var input = document.getElementById("range")
                 var telemetry = document.getElementById('telemetryValue')
                 var data = JSON.parse(event.data)
+                console.log(data)
+                if (data.video && data.video.ret) {
+                    const frameData = data.video.frame;
+                    console.log(frameData)
+                    document.getElementById('videoFrame').src = `data:image/jpeg;base64,${frameData}`;
+                }
                 input.value = data.scrollBar
                 telemetry.innerHTML = data.telemetry  
                 messages.textContent = data.scrollBar
