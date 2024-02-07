@@ -29,7 +29,6 @@ def send_video_frame(ret,frame):
         result, encoded_frame = cv2.imencode('.jpg', frame, encode_param)
         if result:
             encoded_frame_base64 = base64.b64encode(encoded_frame).decode('utf-8')
-            # Send the encoded frame over WebSocket
             ws.send(json.dumps({"scrollBar": scrollBar, "telemetry": telemetry ,"video": {"frame": encoded_frame_base64, "ret": ret}}))
 
 
@@ -51,13 +50,15 @@ def open_stream_window():
     video_label = Label(stream_window)
     video_label.pack()
     # this 1 indicates the usb port -- i think so
-    cap = cv2.VideoCapture(0)
+    try:
+        cap = cv2.VideoCapture(0)
+        if cap is None or not cap.isOpened():
+            cap = cv2.VideoCapture(1)
+    except Exception as e:
+        print("camera not available",str(e))
     update_video(cap,video_label)
 
 def update_video(cap,video_label,fps=15):
-    if cap is None or not cap.isOpened():
-        print("Error: Could not open video.")
-        return
     
     interval = int(1000 / fps)
     
