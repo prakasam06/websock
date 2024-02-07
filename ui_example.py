@@ -44,9 +44,8 @@ def websocket_thread():
 
 def open_stream_window():
     print('videooo')
-    stream_window = Toplevel(root)
-    stream_window.title("Stream Window")
-    
+    stream_window = LabelFrame(video_handler_frame, text="Streaming Video")
+    stream_window.grid(padx=10, pady=10)
     video_label = Label(stream_window)
     video_label.pack()
     # this 1 indicates the usb port -- i think so
@@ -77,7 +76,7 @@ def update_video(cap,video_label,fps=15):
         video_label.after(interval, lambda: update_video(cap, video_label, fps))
     else:
         # 
-        cv2.imshow('USB Webcam', frame)
+        # cv2.imshow('USB Webcam', frame)
         print("Error: Failed to capture frame.")
         if cv2.waitKey(1) & 0xFF == ord('q'):
             print("Quitting...")
