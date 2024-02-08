@@ -50,15 +50,21 @@ html = """
                 var input = document.getElementById("range")
                 var telemetry = document.getElementById('telemetryValue')
                 var data = JSON.parse(event.data)
-                console.log(data)
                 if (data.video && data.video.ret) {
                     const frameData = data.video.frame;
                     console.log(frameData)
                     document.getElementById('videoFrame').src = `data:image/jpeg;base64,${frameData}`;
                 }
-                input.value = data.scrollBar
+
+                if(data.Telemetry_update){
                 telemetry.innerHTML = data.telemetry  
+                
+                }
+
+                if(data.scrollbar_update){
+                input.value = data.scrollBar
                 messages.textContent = data.scrollBar
+                }
             };
 
             function sendData(event) {

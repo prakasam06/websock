@@ -7,29 +7,30 @@ import cv2
 import base64
 import time
 
+video_sending = False
 
 def send_scrollbar_value(value):
     global ws
     global telemetry
     if ws:
-        ws.send(json.dumps({"scrollBar": value, "telemetry": telemetry}))
+        ws.send(json.dumps({"scrollBar": value, "telemetry": telemetry,"scrollbar_update":True}))
 
 def send_telemetry_value(value):
     global ws
-    global scrollBar
+    global Scrollbar
     if ws:
-        ws.send(json.dumps({"scrollBar": scrollBar, "telemetry": value}))
+        ws.send(json.dumps({"scrollBar": scrollBar, "telemetry": value,"Telemetry_update":True}))
 
 def send_video_frame(ret,frame):
     global ws
-    global scroolbar
+    global scrollbar
     global telemetry
     if ws:
         encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 80]  # Adjust JPEG quality for balance between quality and size
         result, encoded_frame = cv2.imencode('.jpg', frame, encode_param)
         if result:
             encoded_frame_base64 = base64.b64encode(encoded_frame).decode('utf-8')
-            ws.send(json.dumps({"scrollBar": scrollBar, "telemetry": telemetry ,"video": {"frame": encoded_frame_base64, "ret": ret}}))
+            ws.send(json.dumps({"scrollBar": scrollBar, "telemetry": telemetry,"video": {"frame": encoded_frame_base64, "ret": ret}}))
 
 
 def websocket_thread():
@@ -38,9 +39,10 @@ def websocket_thread():
     ws = websocket.create_connection("ws://localhost:8000/ws/642003")
     while True:
         data = json.loads(ws.recv())
-        scrollBar = data["scrollBar"]
-        print(data)
-        root.after(0, update_status_bar, data["scrollBar"])
+        if data["scrollBar"]:
+            scrollBar = data["scrollBar"]
+            print(scrollBar)
+            root.after(0, update_status_bar, data["scrollBar"])
 
 def open_stream_window():
     print('videooo')
@@ -83,6 +85,7 @@ def update_video(cap,video_label,fps=15):
             cap.release()
         # 
 def update_status_bar(value):
+    print(value)
     s_bar.set(value)
 # This program is a simple test bed for developing a web interface
 # 
