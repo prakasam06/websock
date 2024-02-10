@@ -36,7 +36,7 @@ def send_video_frame(ret,frame):
 def websocket_thread():
     global ws
     global scrollBar
-    ws = websocket.create_connection("ws://localhost:8000/ws/642003")
+    ws = websocket.create_connection("ws://{%IP ADDRESS MENTIONED IN Main.py%}:8000/ws/642003")
     while True:
         data = json.loads(ws.recv())
         if data["scrollBar"]:

@@ -43,7 +43,7 @@ html = """
     </div>
     
         <script> 
-            var ws = new WebSocket(`ws://localhost:8000/ws/642003`);
+            var ws = new WebSocket(`ws://{%Your Machine IP%}/ws/642003`);
 
             ws.onmessage = function(event) {
                 var messages = document.getElementById('rangeValue')
@@ -52,7 +52,6 @@ html = """
                 var data = JSON.parse(event.data)
                 if (data.video && data.video.ret) {
                     const frameData = data.video.frame;
-                    console.log(frameData)
                     document.getElementById('videoFrame').src = `data:image/jpeg;base64,${frameData}`;
                 }
 
@@ -120,6 +119,6 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             await manager.broadcast(data)
     except WebSocketDisconnect:
         manager.disconnect(websocket)               
-        await manager.broadcast(f"Client #{client_id} has left the chat")
+        # await manager.broadcast(f"Client #{client_id} has left the chat")
 
 

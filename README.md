@@ -22,5 +22,5 @@ pip install -r requirements.txt
 
 ## Step 5
 ```bash
-uvicorn main:app --reload
+uvicorn main:app --reload --host {%Your IP Address mentioned in Main.py%}
 ```
